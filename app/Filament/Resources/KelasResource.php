@@ -6,8 +6,14 @@ use App\Filament\Resources\KelasResource\Pages;
 use App\Filament\Resources\KelasResource\RelationManagers;
 use App\Models\Kelas;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,28 +29,77 @@ class KelasResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('instruktur_id')
-                    ->relationship('instruktur', 'id')
-                    ->required(),
-                Forms\Components\TextInput::make('nama')
-                    ->required()
-                    ->maxLength(45),
-                Forms\Components\TextInput::make('tingkatan')
-                    ->required()
-                    ->maxLength(45),
-                Forms\Components\TextInput::make('jumlah pertemuan')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('jam_mulai')
-                    ->required(),
-                Forms\Components\TextInput::make('jam_selesai')
-                    ->required(),
-                Forms\Components\TextInput::make('harga')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\Textarea::make('deskripsi')
-                    ->required()
-                    ->columnSpanFull(),
+                Section::make('Data Kelas')
+                    ->schema([
+                        Select::make('instruktur_id')
+                            ->label('Instruktur Kelas')
+                            ->placeholder('Pilih Instruktur Kelas')
+                            ->relationship('instruktur', 'nama')
+                            ->native(false)
+                            ->preload()
+                            ->searchable()
+                            ->columnSpanFull()
+                            ->required(),
+                        TextInput::make('nama')
+                            ->label('Nama Kelas')
+                            ->placeholder('Masukkan Nama Kelas')
+                            ->minLength(3)
+                            ->maxLength(45)
+                            ->required()
+                            ->maxLength(45),
+                        TextInput::make('tingkatan')
+                            ->label('Tingkatan Kelas')
+                            ->placeholder('Masukkan Tingkatan Kelas')
+                            ->minLength(3)
+                            ->maxLength(45)
+                            ->required()
+                            ->maxLength(45),
+                    ])->columns(2)
+                    ->columnSpan(1),
+
+                Section::make('Waktu Kelas')
+                    ->schema([
+                        TextInput::make('jumlah pertemuan')
+                            ->label('Jumlah Pertemuan')
+                            ->placeholder('Masukkan Jumlah')
+                            ->suffix('Kali')
+                            ->minValue(1)
+                            ->maxValue(99)
+                            ->minLength(1)
+                            ->maxLength(2)
+                            ->numeric()
+                            ->required(),
+                        TextInput::make('harga')
+                            ->label('Harga Kelas')
+                            ->placeholder('Harga Kelas')
+                            ->prefix('Rp')
+                            ->suffix(',00')
+                            ->minValue(1000)
+                            ->mask(RawJs::make('$money($input)'))
+                            ->stripCharacters(',')
+                            ->numeric()
+                            ->required(),
+                        TimePicker::make('jam_mulai')
+                            ->label('Jam Kelas Mulai')
+                            ->placeholder('Pilih Jam Mulai')
+                            ->native(false)
+                            ->suffix('WITA')
+                            ->required(),
+                        TimePicker::make('jam_selesai')
+                            ->label('Jam Kelas Selesai')
+                            ->placeholder('Pilih Jam Selesai')
+                            ->native(false)
+                            ->suffix('WITA')
+                            ->required(),
+                    ])->columns(2)
+                    ->columnSpan(1),
+
+                Section::make()
+                    ->schema([
+                        Textarea::make('deskripsi')
+                            ->required()
+                            ->columnSpanFull(),
+                    ])
             ]);
     }
 
