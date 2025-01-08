@@ -15,6 +15,11 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -58,6 +63,7 @@ class SertifikatResource extends Resource
                             ->label('File Sertifikat')
                             ->image()
                             ->imageEditor()
+                            ->downloadable()
                             ->visibility('public')
                             ->helperText('Format yang didukung: JPG, PNG, atau GIF.')
                             ->required(),
@@ -69,27 +75,27 @@ class SertifikatResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('kelasUser.id')
+                TextColumn::make('kelasUser.user.name')
+                    ->description(fn(Sertifikat $record) => $record->kelasUser->kelas->nama)
                     ->label('Peserta')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('file')
+                ImageColumn::make('file')
+                    ->label('File Sertifikat')
                     ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
+                    ->icon('heroicon-o-ellipsis-horizontal-circle')
+                    ->color('info')
+                    ->tooltip('Aksi')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

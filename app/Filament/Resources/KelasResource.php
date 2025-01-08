@@ -152,7 +152,7 @@ class KelasResource extends Resource
                         $jamSelesai = Carbon::createFromFormat('H:i:s', $record->jam_selesai)->format('H:i');
 
                         return '<div>' . $record->jumlah_pertemuan . ' kali Pertemuan</div>' .
-                            '<div>' . $jamMulai . ' WITA - ' . $jamSelesai . ' WITA</div>';
+                            '<div class="text-sm text-gray-500 dark:text-gray-400">' . $jamMulai . ' WITA - ' . $jamSelesai . ' WITA</div>';
                     })
                     ->html(),
                 TextColumn::make('harga')
@@ -161,14 +161,6 @@ class KelasResource extends Resource
                     ->suffix(',00')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

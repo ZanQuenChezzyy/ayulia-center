@@ -32,7 +32,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class InstrukturResource extends Resource
 {
     protected static ?string $model = Instruktur::class;
-    protected static ?string $label = 'Instrukutur';
+    protected static ?string $label = 'Instruktur';
     protected static ?string $navigationGroup = 'Instrukutur & Kelas';
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
     protected static ?string $activeNavigationIcon = 'heroicon-s-academic-cap';

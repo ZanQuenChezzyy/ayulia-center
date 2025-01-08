@@ -128,7 +128,7 @@ class PendaftaranResource extends Resource
                             ])->columns(2)
                             ->columnSpan(1),
                     ])->columns(2)
-                    ->columnSpan(3),
+                    ->columnSpan(fn() => Auth::user()->can('Ubah Status Pendaftaran') ? 3 : 4),
                 Section::make('Status Pendaftaran')
                     ->schema([
                         Select::make('status_pembayaran')
@@ -160,7 +160,8 @@ class PendaftaranResource extends Resource
                             ->hidden(fn() => !Auth::user()->can('Ubah Status Pendaftaran'))
                             ->default(0),
                     ])->columns(1)
-                    ->columnSpan(1),
+                    ->columnSpan(1)
+                    ->hidden(fn() => !Auth::user()->can('Ubah Status Pendaftaran')),
                 Section::make('Berkas Pendaftaran')
                     ->schema([
                         FileUpload::make('ktp_url')
@@ -277,7 +278,7 @@ class PendaftaranResource extends Resource
                         default => 'gray',
                     })
                     ->sortable()
-                    ->hidden(fn() => !Auth::user()->can('Ubah Status Pembayaran')),
+                    ->hidden(fn() => !Auth::user()->can('Ubah Status Pendaftaran')),
                 TextColumn::make('status_pendaftaran')
                     ->label('Status Pendaftaran')
                     ->badge()

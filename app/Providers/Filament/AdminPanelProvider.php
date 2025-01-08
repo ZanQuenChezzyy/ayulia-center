@@ -30,10 +30,10 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('/')
+            ->path('/administrator')
             ->spa()
-            ->brandLogo(asset('img/laravelchezzy.png'))
-            ->brandLogoHeight('2rem')
+            ->brandLogo(asset('img/ayulia-logo.png'))
+            ->brandLogoHeight('3rem')
             ->login(Login::class)
             ->profile(EditProfile::class)
             ->colors([
@@ -63,7 +63,7 @@ class AdminPanelProvider extends PanelProvider
                     ->formPanelWidth('40%')
                     ->emptyPanelBackgroundColor(Color::hex('#030712'))
                     ->emptyPanelBackgroundImageOpacity('60%')
-                    ->emptyPanelBackgroundImageUrl(asset('img/auth/background-auth.png')),
+                    ->emptyPanelBackgroundImageUrl(asset('img/auth/background-auth.jpeg')),
                 LightSwitchPlugin::make(),
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
