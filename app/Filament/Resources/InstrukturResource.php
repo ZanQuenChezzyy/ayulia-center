@@ -32,8 +32,21 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class InstrukturResource extends Resource
 {
     protected static ?string $model = Instruktur::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $label = 'Instrukutur';
+    protected static ?string $navigationGroup = 'Instrukutur & Kelas';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-academic-cap';
+    protected static ?int $navigationSort = 2;
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::getModel()::count() < 10 ? 'warning' : 'info';
+    }
+    protected static ?string $navigationBadgeTooltip = 'Total Instruktur';
+    protected static ?string $slug = 'instruktur';
 
     public static function form(Form $form): Form
     {
@@ -112,13 +125,13 @@ class InstrukturResource extends Resource
                                     ->placeholder('Pilih pendidikan terakhir')
                                     ->inlineLabel()
                                     ->options([
-                                        1 => 'SD - Sekolah Dasar',
-                                        2 => 'SMP - Sekolah Menengah Pertama',
-                                        3 => 'SMA - Sekolah Menengah Atas',
-                                        4 => 'D3 - Diploma 3',
-                                        5 => 'S1 - Sarjana',
-                                        6 => 'S2 - Magister',
-                                        7 => 'S3 - Doktor',
+                                        0 => 'SD - Sekolah Dasar',
+                                        1 => 'SMP - Sekolah Menengah Pertama',
+                                        2 => 'SMA - Sekolah Menengah Atas',
+                                        3 => 'D3 - Diploma 3',
+                                        4 => 'S1 - Sarjana',
+                                        5 => 'S2 - Magister',
+                                        6 => 'S3 - Doktor',
                                     ])
                                     ->native(false)
                                     ->preload()
@@ -186,13 +199,13 @@ class InstrukturResource extends Resource
                     ->label('Pendidikan')
                     ->badge()
                     ->formatStateUsing(fn(int $state): string => match ($state) {
-                        1 => 'SD - Sekolah Dasar',
-                        2 => 'SMP - Sekolah Menengah Pertama',
-                        3 => 'SMA - Sekolah Menengah Atas',
-                        4 => 'D3 - Diploma 3',
-                        5 => 'S1 - Sarjana',
-                        6 => 'S2 - Magister',
-                        7 => 'S3 - Doktor',
+                        0 => 'SD - Sekolah Dasar',
+                        1 => 'SMP - Sekolah Menengah Pertama',
+                        2 => 'SMA - Sekolah Menengah Atas',
+                        3 => 'D3 - Diploma 3',
+                        4 => 'S1 - Sarjana',
+                        5 => 'S2 - Magister',
+                        6 => 'S3 - Doktor',
                         default => 'Lainnya',
                     })
                     ->color('info'),

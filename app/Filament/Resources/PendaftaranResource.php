@@ -5,117 +5,309 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PendaftaranResource\Pages;
 use App\Filament\Resources\PendaftaranResource\RelationManagers;
 use App\Models\Pendaftaran;
+use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class PendaftaranResource extends Resource
 {
     protected static ?string $model = Pendaftaran::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $label = 'Pendaftar';
+    protected static ?string $navigationGroup = 'Kelola Pendaftar';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-user';
+    protected static ?int $navigationSort = 5;
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::getModel()::count() < 10 ? 'warning' : 'info';
+    }
+    protected static ?string $navigationBadgeTooltip = 'Total Pendaftar';
+    protected static ?string $slug = 'pendaftar';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('kelas_id')
-                    ->relationship('kelas', 'id')
-                    ->required(),
-                Forms\Components\TextInput::make('nama')
-                    ->required()
-                    ->maxLength(45),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(45),
-                Forms\Components\TextInput::make('no_telepon')
-                    ->tel()
-                    ->required()
-                    ->maxLength(15),
-                Forms\Components\TextInput::make('tempat_lahir')
-                    ->required()
-                    ->maxLength(45),
-                Forms\Components\DatePicker::make('tanggal_lahir')
-                    ->required(),
-                Forms\Components\Textarea::make('alamat')
-                    ->required()
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('pendidikan_terakhir')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('ktp_url')
-                    ->required()
-                    ->maxLength(100),
-                Forms\Components\TextInput::make('avatar_url')
-                    ->required()
-                    ->maxLength(100),
-                Forms\Components\TextInput::make('bukti_pembayaran')
-                    ->required()
-                    ->maxLength(100),
-                Forms\Components\TextInput::make('status_pembayaran')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('status_pendaftaran')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-            ]);
+                Section::make('Formulir Pendaftaran')
+                    ->schema([
+                        Group::make()
+                            ->schema([
+                                Select::make('kelas_id')
+                                    ->label('Kelas')
+                                    ->placeholder('Pilih Kelas')
+                                    ->relationship('kelas', 'nama')
+                                    ->native(false)
+                                    ->preload()
+                                    ->searchable()
+                                    ->columnSpanFull()
+                                    ->required(),
+                                TextInput::make('nama')
+                                    ->label('Nama Pendaftar')
+                                    ->placeholder('Masukkan Nama Pendaftar')
+                                    ->minLength(3)
+                                    ->maxLength(45)
+                                    ->columnSpanFull()
+                                    ->required(),
+                                TextInput::make('no_telepon')
+                                    ->label('Nomor Telepon')
+                                    ->placeholder('Masukkan Nomor Telepon')
+                                    ->prefix('+62')
+                                    ->tel()
+                                    ->maxLength(15)
+                                    ->columnSpanFull()
+                                    ->required(),
+                                TextInput::make('email')
+                                    ->label('Email Pendaftar')
+                                    ->placeholder('Masukkan Email Pendaftar')
+                                    ->email()
+                                    ->maxLength(45)
+                                    ->columnSpanFull()
+                                    ->required(),
+                            ])->columns(2)
+                            ->columnSpan(1),
+                        Group::make()
+                            ->schema([
+                                Select::make('pendidikan_terakhir')
+                                    ->label('Pendidikan Terakhir')
+                                    ->placeholder('Pilih pendidikan terakhir')
+                                    ->options([
+                                        0 => 'SD - Sekolah Dasar',
+                                        1 => 'SMP - Sekolah Menengah Pertama',
+                                        2 => 'SMA - Sekolah Menengah Atas',
+                                        3 => 'D3 - Diploma 3',
+                                        4 => 'S1 - Sarjana',
+                                        5 => 'S2 - Magister',
+                                        6 => 'S3 - Doktor',
+                                    ])
+                                    ->native(false)
+                                    ->preload()
+                                    ->searchable()
+                                    ->columnSpanFull()
+                                    ->required(),
+                                TextInput::make('tempat_lahir')
+                                    ->label('Tempat Lahir')
+                                    ->placeholder('Masukkan Tempat Lahir')
+                                    ->maxLength(45)
+                                    ->required(),
+                                DatePicker::make('tanggal_lahir')
+                                    ->label('Tanggal Lahir')
+                                    ->placeholder('Pilih Tanggal Lahir')
+                                    ->native(false)
+                                    ->required(),
+                                Textarea::make('alamat')
+                                    ->label('Alamat')
+                                    ->placeholder('Masukkan Alamat')
+                                    ->required()
+                                    ->columnSpanFull()
+                                    ->rows(5),
+                            ])->columns(2)
+                            ->columnSpan(1),
+                    ])->columns(2)
+                    ->columnSpan(3),
+                Section::make('Status Pendaftaran')
+                    ->schema([
+                        Select::make('status_pembayaran')
+                            ->label('Status Pembayaran')
+                            ->placeholder('Pilih Status Pembayaran')
+                            ->options([
+                                0 => 'Menunggu',
+                                1 => 'Belum Bayar',
+                                2 => 'Sudah Bayar',
+                            ])
+                            ->native(false)
+                            ->preload()
+                            ->searchable()
+                            ->required()
+                            ->hidden(fn() => !Auth::user()->can('Ubah Status Pendaftaran'))
+                            ->default(0),
+                        Select::make('status_pendaftaran')
+                            ->label('Status Pendaftaran')
+                            ->placeholder('Pilih Status Pendaftaran')
+                            ->options([
+                                0 => 'Menunggu',
+                                1 => 'Diterima',
+                                2 => 'Ditolak',
+                            ])
+                            ->native(false)
+                            ->preload()
+                            ->searchable()
+                            ->required()
+                            ->hidden(fn() => !Auth::user()->can('Ubah Status Pendaftaran'))
+                            ->default(0),
+                    ])->columns(1)
+                    ->columnSpan(1),
+                Section::make('Berkas Pendaftaran')
+                    ->schema([
+                        FileUpload::make('ktp_url')
+                            ->label('Kartu Tanda Penduduk')
+                            ->image()
+                            ->imageEditor()
+                            ->visibility('public')
+                            ->helperText('Format yang didukung: JPG, PNG, atau GIF.')
+                            ->required(),
+                        FileUpload::make('avatar_url')
+                            ->label('Foto Latar Merah')
+                            ->image()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '1:1',
+                            ])
+                            ->imageCropAspectRatio('1:1')
+                            ->directory('foto_instruktur')
+                            ->visibility('public')
+                            ->helperText('Format yang didukung: JPG, PNG, atau GIF.')
+                            ->required(),
+                        FileUpload::make('bukti_pembayaran')
+                            ->label('Bukti Pembayaran')
+                            ->image()
+                            ->imageEditor()
+                            ->visibility('public')
+                            ->helperText('Format yang didukung: JPG, PNG, atau GIF.')
+                            ->required(),
+                    ])->columns(3)
+                    ->columnSpanFull()
+            ])->columns(4);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('kelas.id')
-                    ->numeric()
+                TextColumn::make('nama')
+                    ->label('Pendaftar')
+                    ->formatStateUsing(function (Pendaftaran $record) {
+                        $nameParts = explode(' ', trim($record->nama));
+                        $initials = isset($nameParts[1])
+                            ? strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[1], 0, 1))
+                            : strtoupper(substr($nameParts[0], 0, 1));
+                        $fotoUrl = $record->avatar_url
+                            ? asset('storage/' . $record->avatar_url)
+                            : 'https://ui-avatars.com/api/?name=' . $initials . '&amp;color=FFFFFF&amp;background=030712';
+                        $image = '<img class="w-10 h-10 rounded-lg" style="margin-right: 0.625rem !important;" src="' . $fotoUrl . '" alt="Avatar User">';
+                        $nama = '<strong class="text-sm font-medium text-gray-800">' . e($record->nama) . '</strong>';
+                        $noTelepon = '<span class="font-light text-gray-300">' . e($record->email) . ' | ' . ' +62 ' . e($record->no_telepon) . '</span>';
+                        return '<div class="flex items-center" style="margin-right: 4rem !important">'
+                            . $image
+                            . '<div>' . $nama . '<br>' . $noTelepon . '</div></div>';
+                    })
+                    ->html()
+                    ->sortable(['nama'])
+                    ->searchable(['nama', 'no_telepon', 'email']),
+                TextColumn::make('kelas.nama')
+                    ->label('Kelas')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('nama')
+                TextColumn::make('tempat_lahir')
+                    ->formatStateUsing(function (Pendaftaran $record) {
+                        // Set locale to Indonesian
+                        Carbon::setLocale('id');
+
+                        // Format tanggal dengan bulan dalam bahasa Indonesia
+                        $tanggalLahir = Carbon::parse($record->tanggal_lahir)->translatedFormat('d F Y');
+
+                        return $record->tempat_lahir . ', ' . $tanggalLahir;
+                    })
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('no_telepon')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('tempat_lahir')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('tanggal_lahir')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('pendidikan_terakhir')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('ktp_url')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('avatar_url')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('bukti_pembayaran')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('status_pembayaran')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status_pendaftaran')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
+                TextColumn::make('pendidikan_terakhir')
+                    ->label('Pendidikan')
+                    ->badge()
+                    ->formatStateUsing(fn(int $state): string => match ($state) {
+                        0 => 'SD - Sekolah Dasar',
+                        1 => 'SMP - Sekolah Menengah Pertama',
+                        2 => 'SMA - Sekolah Menengah Atas',
+                        3 => 'D3 - Diploma 3',
+                        4 => 'S1 - Sarjana',
+                        5 => 'S2 - Magister',
+                        6 => 'S3 - Doktor',
+                        default => 'Lainnya',
+                    })
+                    ->color('info'),
+                ImageColumn::make('ktp_url')
+                    ->label('Berkas KTP')
+                    ->square()
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
+                ImageColumn::make('avatar_url')
+                    ->label('Berkas Latar Merah')
+                    ->square()
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                ImageColumn::make('bukti_pembayaran')
+                    ->label('Berkas Bukti Pembayaran')
+                    ->square()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('status_pembayaran')
+                    ->label('Status Pembayaran')
+                    ->badge()
+                    ->formatStateUsing(fn(int $state): string => match ($state) {
+                        0 => 'Menunggu',
+                        1 => 'Belum Bayar',
+                        2 => 'Sudah Bayar',
+                        default => 'Status Tidak Diketahui',
+                    })
+                    ->color(fn(int $state): string => match ($state) {
+                        0 => 'warning',
+                        1 => 'danger',
+                        2 => 'success',
+                        default => 'gray',
+                    })
+                    ->sortable()
+                    ->hidden(fn() => !Auth::user()->can('Ubah Status Pembayaran')),
+                TextColumn::make('status_pendaftaran')
+                    ->label('Status Pendaftaran')
+                    ->badge()
+                    ->formatStateUsing(fn(int $state): string => match ($state) {
+                        0 => 'Menunggu',
+                        1 => 'Diterima',
+                        2 => 'Ditolak',
+                        default => 'Status Tidak Diketahui',
+                    })
+                    ->color(fn(int $state): string => match ($state) {
+                        0 => 'warning',
+                        1 => 'success',
+                        2 => 'danger',
+                        default => 'gray',
+                    })
+                    ->sortable()
+                    ->hidden(fn() => !Auth::user()->can('Ubah Status Pendaftaran')),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
+                    ->icon('heroicon-o-ellipsis-horizontal-circle')
+                    ->color('info')
+                    ->tooltip('Aksi')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

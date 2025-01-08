@@ -2,13 +2,21 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Clusters\PusatInformasi;
 use App\Filament\Resources\PertanyaanResource\Pages;
 use App\Filament\Resources\PertanyaanResource\RelationManagers;
 use App\Models\Pertanyaan;
 use Filament\Forms;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -16,21 +24,49 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class PertanyaanResource extends Resource
 {
     protected static ?string $model = Pertanyaan::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $cluster = PusatInformasi::class;
+    protected static ?string $label = 'FAQ';
+    protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-question-mark-circle';
+    protected static ?int $navigationSort = 1;
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::getModel()::count() < 10 ? 'warning' : 'info';
+    }
+    protected static ?string $navigationBadgeTooltip = 'Total FAQ';
+    protected static ?string $slug = 'pertanyaan';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('pertanyaan')
-                    ->required()
-                    ->maxLength(45),
-                Forms\Components\TextInput::make('jawaban')
-                    ->required()
-                    ->maxLength(60),
-                Forms\Components\Toggle::make('di_tampilkan')
-                    ->required(),
+                Section::make()
+                    ->schema([
+                        Group::make()
+                            ->schema([
+                                TextInput::make('pertanyaan')
+                                    ->label('Pertanyaan')
+                                    ->placeholder('Masukkan Pertanyaan')
+                                    ->minLength(10)
+                                    ->maxLength(45)
+                                    ->required(),
+                                TextInput::make('jawaban')
+                                    ->label('Jawaban')
+                                    ->placeholder('Masukkan Jawaban')
+                                    ->minLength(10)
+                                    ->maxLength(60)
+                                    ->required(),
+                            ])->columnSpan(3),
+                        Toggle::make('di_tampilkan')
+                            ->label('Di Tampilkan ?')
+                            ->inline(false)
+                            ->required(),
+                    ])->columns(4)
+
             ]);
     }
 
@@ -38,20 +74,12 @@ class PertanyaanResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('pertanyaan')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('jawaban')
-                    ->searchable(),
-                Tables\Columns\IconColumn::make('di_tampilkan')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('pertanyaan')
+                    ->label('Pertanyaan & Jawaban')
+                    ->description(fn(Pertanyaan $record): string => $record->jawaban)
+                    ->limit(50),
+                ToggleColumn::make('di_tampilkan')
+                    ->label('Di Tampilkan ?'),
             ])
             ->filters([
                 //
