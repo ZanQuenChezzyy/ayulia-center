@@ -2,13 +2,19 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Clusters\PusatInformasi;
 use App\Filament\Resources\PesanResource\Pages;
 use App\Filament\Resources\PesanResource\RelationManagers;
 use App\Models\Pesan;
 use Filament\Forms;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -16,23 +22,54 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class PesanResource extends Resource
 {
     protected static ?string $model = Pesan::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $cluster = PusatInformasi::class;
+    protected static ?string $label = 'QNA';
+    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-ellipsis';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-chat-bubble-left-ellipsis';
+    protected static ?int $navigationSort = 1;
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::getModel()::count() < 10 ? 'warning' : 'info';
+    }
+    protected static ?string $navigationBadgeTooltip = 'Total QNA';
+    protected static ?string $slug = 'pesan';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nama')
-                    ->required()
-                    ->maxLength(45),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(45),
-                Forms\Components\Textarea::make('pesan')
-                    ->required()
-                    ->columnSpanFull(),
+                Section::make('Data Pengirim')
+                    ->schema([
+                        Group::make()
+                            ->schema([
+                                TextInput::make('nama')
+                                    ->label('Nama Pengirim Pesan')
+                                    ->placeholder('Nama Pengirim')
+                                    ->required()
+                                    ->maxLength(45),
+                                TextInput::make('email')
+                                    ->label('Email Pengirim Pesan')
+                                    ->placeholder('Email Pengirim')
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(45),
+                            ]),
+                        Group::make()
+                            ->schema([
+                                Textarea::make('pesan')
+                                    ->label('Pesan Pengirim')
+                                    ->placeholder('Isi Pesan')
+                                    ->rows(5)
+                                    ->autosize()
+                                    ->required()
+                                    ->columnSpanFull(),
+                            ])
+                    ])->columns(2)
+                    ->columnSpanFull()
             ]);
     }
 
@@ -40,18 +77,12 @@ class PesanResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nama')
+                TextColumn::make('nama')
+                    ->label('Pengirim')
+                    ->description(fn(Pesan $record) => $record->email)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('pesan')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

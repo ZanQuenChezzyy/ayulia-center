@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('instruktur_id')->constrained('instrukturs')->cascadeOnDelete();
             $table->string('nama', 45);
             $table->string('tingkatan', 45);
-            $table->unsignedTinyInteger('jumlah pertemuan')->length(2);
+            $table->unsignedTinyInteger('jumlah_pertemuan')->length(2);
             $table->time('jam_mulai');
             $table->time('jam_selesai');
             $table->unsignedBigInteger('harga');
