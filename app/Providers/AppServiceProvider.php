@@ -7,6 +7,8 @@ use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\PermissionResource;
 use App\Filament\Resources\RoleResource;
 use App\Filament\Resources\UserResource;
+use App\Models\Pendaftaran;
+use App\Observers\PendaftaranObserver;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
@@ -53,5 +55,8 @@ class AppServiceProvider extends ServiceProvider
                 PermissionResource::class,
             ]
         );
+
+        //Observers
+        Pendaftaran::observe(PendaftaranObserver::class);
     }
 }

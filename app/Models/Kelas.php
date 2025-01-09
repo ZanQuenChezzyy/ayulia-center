@@ -30,7 +30,6 @@ class Kelas extends Model
         return $this->hasMany(\App\Models\Pendaftaran::class);
     }
 
-
     public function kelasUsers(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(\App\Models\KelasUser::class);

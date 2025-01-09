@@ -10,6 +10,7 @@ use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -21,6 +22,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -40,9 +42,9 @@ class AdminPanelProvider extends PanelProvider
                 'danger' => Color::Rose,
                 'gray' => Color::Gray,
                 'info' => Color::Cyan,
-                'primary' => Color::Indigo,
+                'primary' => Color::Orange,
                 'success' => Color::Emerald,
-                'warning' => Color::Orange,
+                'warning' => Color::Yellow,
             ])
             ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
@@ -50,6 +52,14 @@ class AdminPanelProvider extends PanelProvider
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->pages([
                 Dashboard::class,
+            ])
+            ->navigationItems([
+                NavigationItem::make('Halaman Depan')
+                    ->url('/', shouldOpenInNewTab: false)
+                    ->icon('heroicon-o-computer-desktop')
+                    ->group('Halaman Depan')
+                    ->sort(7)
+                    ->hidden(fn() => !Auth::user()->hasRole('Administrator'))
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

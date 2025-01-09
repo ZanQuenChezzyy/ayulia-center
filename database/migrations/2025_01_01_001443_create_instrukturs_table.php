@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('pendidikan_terakhir')->length(1);
             $table->string('sertifikat', 100);
             $table->string('pengalaman', 60);
+            $table->boolean('di_tampilkan')->default(false);
             $table->timestamps();
         });
     }

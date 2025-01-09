@@ -23,6 +23,7 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,8 +34,8 @@ use Illuminate\Support\Facades\Auth;
 class PendaftaranResource extends Resource
 {
     protected static ?string $model = Pendaftaran::class;
-    protected static ?string $label = 'Pendaftar';
-    protected static ?string $navigationGroup = 'Kelola Pendaftar';
+    protected static ?string $label = 'Peserta';
+    protected static ?string $navigationGroup = 'Pusat Informasi';
     protected static ?string $navigationIcon = 'heroicon-o-user';
     protected static ?string $activeNavigationIcon = 'heroicon-s-user';
     protected static ?int $navigationSort = 5;
@@ -46,8 +47,8 @@ class PendaftaranResource extends Resource
     {
         return static::getModel()::count() < 10 ? 'warning' : 'info';
     }
-    protected static ?string $navigationBadgeTooltip = 'Total Pendaftar';
-    protected static ?string $slug = 'pendaftar';
+    protected static ?string $navigationBadgeTooltip = 'Total Peserta';
+    protected static ?string $slug = 'peserta';
 
     public static function form(Form $form): Form
     {
@@ -67,8 +68,8 @@ class PendaftaranResource extends Resource
                                     ->columnSpanFull()
                                     ->required(),
                                 TextInput::make('nama')
-                                    ->label('Nama Pendaftar')
-                                    ->placeholder('Masukkan Nama Pendaftar')
+                                    ->label('Nama Peserta')
+                                    ->placeholder('Masukkan Nama Peserta')
                                     ->minLength(3)
                                     ->maxLength(45)
                                     ->columnSpanFull()
@@ -82,8 +83,8 @@ class PendaftaranResource extends Resource
                                     ->columnSpanFull()
                                     ->required(),
                                 TextInput::make('email')
-                                    ->label('Email Pendaftar')
-                                    ->placeholder('Masukkan Email Pendaftar')
+                                    ->label('Email Peserta')
+                                    ->placeholder('Masukkan Email Peserta')
                                     ->email()
                                     ->maxLength(45)
                                     ->columnSpanFull()
@@ -136,8 +137,8 @@ class PendaftaranResource extends Resource
                             ->placeholder('Pilih Status Pembayaran')
                             ->options([
                                 0 => 'Menunggu',
-                                1 => 'Belum Bayar',
-                                2 => 'Sudah Bayar',
+                                1 => 'Sudah Bayar',
+                                2 => 'Belum Bayar',
                             ])
                             ->native(false)
                             ->preload()
@@ -200,7 +201,7 @@ class PendaftaranResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('nama')
-                    ->label('Pendaftar')
+                    ->label('Peserta')
                     ->formatStateUsing(function (Pendaftaran $record) {
                         $nameParts = explode(' ', trim($record->nama));
                         $initials = isset($nameParts[1])
@@ -211,7 +212,7 @@ class PendaftaranResource extends Resource
                             : 'https://ui-avatars.com/api/?name=' . $initials . '&amp;color=FFFFFF&amp;background=030712';
                         $image = '<img class="w-10 h-10 rounded-lg" style="margin-right: 0.625rem !important;" src="' . $fotoUrl . '" alt="Avatar User">';
                         $nama = '<strong class="text-sm font-medium text-gray-800">' . e($record->nama) . '</strong>';
-                        $noTelepon = '<span class="font-light text-gray-300">' . e($record->email) . ' | ' . ' +62 ' . e($record->no_telepon) . '</span>';
+                        $noTelepon = '<span class="text-sm text-gray-500 dark:text-gray-400">' . e($record->email) . ' | ' . ' +62 ' . e($record->no_telepon) . '</span>';
                         return '<div class="flex items-center" style="margin-right: 4rem !important">'
                             . $image
                             . '<div>' . $nama . '<br>' . $noTelepon . '</div></div>';
@@ -223,6 +224,7 @@ class PendaftaranResource extends Resource
                     ->label('Kelas')
                     ->sortable(),
                 TextColumn::make('tempat_lahir')
+                    ->label('Tempat, Tanggal Lahir')
                     ->formatStateUsing(function (Pendaftaran $record) {
                         // Set locale to Indonesian
                         Carbon::setLocale('id');
@@ -232,7 +234,8 @@ class PendaftaranResource extends Resource
 
                         return $record->tempat_lahir . ', ' . $tanggalLahir;
                     })
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('pendidikan_terakhir')
                     ->label('Pendidikan')
                     ->badge()
@@ -262,39 +265,21 @@ class PendaftaranResource extends Resource
                     ->square()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('status_pembayaran')
+                SelectColumn::make('status_pembayaran')
                     ->label('Status Pembayaran')
-                    ->badge()
-                    ->formatStateUsing(fn(int $state): string => match ($state) {
+                    ->options([
                         0 => 'Menunggu',
-                        1 => 'Belum Bayar',
-                        2 => 'Sudah Bayar',
-                        default => 'Status Tidak Diketahui',
-                    })
-                    ->color(fn(int $state): string => match ($state) {
-                        0 => 'warning',
-                        1 => 'danger',
-                        2 => 'success',
-                        default => 'gray',
-                    })
-                    ->sortable()
+                        1 => 'Sudah Bayar',
+                        2 => 'Belum Bayar',
+                    ])
                     ->hidden(fn() => !Auth::user()->can('Ubah Status Pendaftaran')),
-                TextColumn::make('status_pendaftaran')
+                SelectColumn::make('status_pendaftaran')
                     ->label('Status Pendaftaran')
-                    ->badge()
-                    ->formatStateUsing(fn(int $state): string => match ($state) {
+                    ->options([
                         0 => 'Menunggu',
-                        1 => 'Diterima',
-                        2 => 'Ditolak',
-                        default => 'Status Tidak Diketahui',
-                    })
-                    ->color(fn(int $state): string => match ($state) {
-                        0 => 'warning',
-                        1 => 'success',
-                        2 => 'danger',
-                        default => 'gray',
-                    })
-                    ->sortable()
+                        1 => 'Sudah Bayar',
+                        2 => 'Belum Bayar',
+                    ])
                     ->hidden(fn() => !Auth::user()->can('Ubah Status Pendaftaran')),
             ])
             ->filters([

@@ -16,6 +16,7 @@ class Instruktur extends Model
         'pendidikan_terakhir',
         'sertifikat',
         'pengalaman',
+        'di_tampilkan',
     ];
 
     public function kelas(): \Illuminate\Database\Eloquent\Relations\HasMany

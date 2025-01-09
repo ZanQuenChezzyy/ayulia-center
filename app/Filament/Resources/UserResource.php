@@ -8,6 +8,8 @@ use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
@@ -21,6 +23,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -106,26 +109,92 @@ class UserResource extends Resource
                     ->tabs([
                         Tab::make('Informasi Pribadi')
                             ->schema([
-                                TextInput::make('name')
-                                    ->label(__('filament-panels::pages/auth/edit-profile.form.name.label'))
-                                    ->placeholder(__('filament-panels::pages/auth/edit-profile.form.name.placeholder'))
-                                    ->inlineLabel()
-                                    ->columnSpanFull()
-                                    ->required()
-                                    ->minLength(3)
-                                    ->maxLength(45)
-                                    ->autofocus(),
+                                Group::make()
+                                    ->schema([
+                                        TextInput::make('name')
+                                            ->label(__('filament-panels::pages/auth/edit-profile.form.name.label'))
+                                            ->placeholder(__('filament-panels::pages/auth/edit-profile.form.name.placeholder'))
+                                            ->inlineLabel()
+                                            ->required()
+                                            ->minLength(3)
+                                            ->maxLength(45)
+                                            ->autofocus(),
 
-                                TextInput::make('email')
-                                    ->label(__('filament-panels::pages/auth/edit-profile.form.email.label'))
-                                    ->placeholder(__('filament-panels::pages/auth/edit-profile.form.email.placeholder'))
-                                    ->inlineLabel()
-                                    ->columnSpanFull()
-                                    ->email()
-                                    ->required()
-                                    ->minLength(3)
-                                    ->maxLength(45)
-                                    ->unique(ignoreRecord: true),
+                                        TextInput::make('email')
+                                            ->label(__('filament-panels::pages/auth/edit-profile.form.email.label'))
+                                            ->placeholder(__('filament-panels::pages/auth/edit-profile.form.email.placeholder'))
+                                            ->inlineLabel()
+                                            ->email()
+                                            ->minLength(3)
+                                            ->maxLength(45)
+                                            ->required()
+                                            ->unique(ignoreRecord: true),
+
+                                        TextInput::make('no_telepon')
+                                            ->label('Nomor Telepon')
+                                            ->placeholder('Masukkan Nomor Telepon')
+                                            ->inlineLabel()
+                                            ->prefix('+62')
+                                            ->minValue(1)
+                                            ->minLength(10)
+                                            ->maxLength(15)
+                                            ->tel()
+                                            ->mask(
+                                                RawJs::make(<<<'JS'
+                                        $input.startsWith('+62')
+                                            ? $input.replace(/^\+62/, '')
+                                            : ($input.startsWith('62')
+                                                ? $input.replace(/^62/, '')
+                                                : ($input.startsWith('0')
+                                            ? $input.replace(/^0/, '')
+                                            : $input
+                                            )
+                                        )
+                                    JS)
+                                            )
+                                            ->stripCharacters([' ', '-', '(', ')'])
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                $cleaned = preg_replace('/^(\+62|62|0)/', '', $state);
+                                                if (!str_starts_with($cleaned, '8')) {
+                                                    $set('no_hp', null);
+                                                } else {
+                                                    $set('no_hp', $cleaned);
+                                                }
+                                            })
+                                            ->Unique(ignoreRecord: true),
+
+                                        Select::make('pendidikan_terakhir')
+                                            ->label('Pendidikan Terakhir')
+                                            ->placeholder('Pilih Pendidikan Terakhir')
+                                            ->inlineLabel()
+                                            ->options([
+                                                '0' => 'SD - Sekolah Dasar',
+                                                '1' => 'SMP - Sekolah Menengah Pertama',
+                                                '2' => 'SMA - Sekolah Menengah Atas',
+                                                '3' => 'D3 - Diploma III',
+                                                '4' => 'S1 / D4 - Sarjana / Diploma IV',
+                                                '5' => 'S2 - Magister',
+                                                '6' => 'S3 - Doktor',
+                                            ])
+                                            ->native(false)
+                                            ->preload()
+                                            ->searchable()
+                                            ->required(),
+                                    ])->columnSpan(2),
+
+                                Fieldset::make('Tempat, Tanggal Lahir')
+                                    ->schema([
+                                        TextInput::make('tempat_lahir')
+                                            ->label('Tempat Lahir')
+                                            ->placeholder('Masukkan Tempat Lahir')
+                                            ->minLength(3)
+                                            ->maxLength(45),
+
+                                        DatePicker::make('tanggal_lahir')
+                                            ->label('Tanggal Lahir')
+                                            ->placeholder('Pilih Tanggal Lahir')
+                                            ->native(false),
+                                    ]),
                             ]),
 
                         Tab::make('Kata Sandi')
@@ -158,7 +227,7 @@ class UserResource extends Resource
                                     ->required()
                                     ->visible(fn(Get $get): bool => filled($get('password')))
                                     ->dehydrated(false),
-                            ])
+                            ]),
                     ])
                     ->columnSpan([
                         'default' => fn(?User $record) => $record === null ? 3 : 3,
@@ -208,7 +277,7 @@ class UserResource extends Resource
                             : 'https://ui-avatars.com/api/?name=' . $initials . '&amp;color=FFFFFF&amp;background=030712';
                         $image = '<img class="w-10 h-10 rounded-lg" style="margin-right: 0.625rem !important;" src="' . $avatarUrl . '" alt="Avatar User">';
                         $nama = '<strong class="text-sm font-medium text-gray-800">' . e($record->name) . '</strong>';
-                        $email = '<span class="font-light text-gray-300">' . e($record->email) . '</span>';
+                        $email = '<span class="text-sm text-gray-500 dark:text-gray-400">' . e($record->email) . '</span>';
                         return '<div class="flex items-center" style="margin-right: 4rem !important">'
                             . $image
                             . '<div>' . $nama . '<br>' . $email . '</div></div>';

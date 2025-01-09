@@ -36,7 +36,7 @@ class KelasUserResource extends Resource
     {
         return static::getModel()::count() < 10 ? 'warning' : 'info';
     }
-    protected static ?string $navigationBadgeTooltip = 'Total Peserta';
+    protected static ?string $navigationBadgeTooltip = 'Total Kelas Peserta';
     protected static ?string $slug = 'kelas-peserta';
 
     public static function form(Form $form): Form

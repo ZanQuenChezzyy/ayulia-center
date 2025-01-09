@@ -25,9 +25,11 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class InstrukturResource extends Resource
 {
@@ -183,7 +185,7 @@ class InstrukturResource extends Resource
                             : 'https://ui-avatars.com/api/?name=' . $initials . '&amp;color=FFFFFF&amp;background=030712';
                         $image = '<img class="w-10 h-10 rounded-lg" style="margin-right: 0.625rem !important;" src="' . $fotoUrl . '" alt="Avatar User">';
                         $nama = '<strong class="text-sm font-medium text-gray-800">' . e($record->nama) . '</strong>';
-                        $noTelepon = '<span class="font-light text-gray-300">+62 ' . e($record->no_telepon) . '</span>';
+                        $noTelepon = '<span class="text-sm text-gray-500 dark:text-gray-400">+62 ' . e($record->no_telepon) . '</span>';
                         return '<div class="flex items-center" style="margin-right: 4rem !important">'
                             . $image
                             . '<div>' . $nama . '<br>' . $noTelepon . '</div></div>';
@@ -209,6 +211,10 @@ class InstrukturResource extends Resource
                         default => 'Lainnya',
                     })
                     ->color('info'),
+
+                ToggleColumn::make('di_tampilkan')
+                    ->label('Di tampilkan ?')
+                    ->hidden(fn() => !Auth::user()->can('Ubah Instruktur')),
 
                 ImageColumn::make('sertifikat')
                     ->square()

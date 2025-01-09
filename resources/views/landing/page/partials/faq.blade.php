@@ -22,80 +22,25 @@
             </div>
             <div class="col-lg-7">
                 <div class="accordion" id="accordionExample">
-                    <div class="card accordion-item">
-                        <h2 class="accordion-header" id="headingOne">
-                            <button type="button" class="accordion-button" data-bs-toggle="collapse"
-                                data-bs-target="#accordionOne" aria-expanded="true" aria-controls="accordionOne">
-                                Apakah saya memerlukan peralatan khusus untuk pelatihan?
-                            </button>
-                        </h2>
-                        <div id="accordionOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                Anda tidak perlu khawatir, kami menyediakan semua peralatan yang diperlukan selama
-                                pelatihan.
+                    @foreach ($faqs as $index => $faq)
+                        <div class="card accordion-item">
+                            <h2 class="accordion-header" id="heading{{ $index }}">
+                                <button type="button" class="accordion-button {{ $index === 0 ? '' : 'collapsed' }}"
+                                    data-bs-toggle="collapse" data-bs-target="#accordion{{ $index }}"
+                                    aria-expanded="{{ $index === 0 ? 'true' : 'false' }}"
+                                    aria-controls="accordion{{ $index }}">
+                                    {{ $faq->pertanyaan }}
+                                </button>
+                            </h2>
+                            <div id="accordion{{ $index }}"
+                                class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}"
+                                data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    {{ $faq->jawaban }}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="card accordion-item">
-                        <h2 class="accordion-header" id="headingTwo">
-                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#accordionTwo" aria-expanded="false" aria-controls="accordionTwo">
-                                Bagaimana cara mendaftar untuk kelas pelatihan?
-                            </button>
-                        </h2>
-                        <div id="accordionTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-                            data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                Anda dapat mendaftar secara online melalui website kami atau langsung datang ke kantor
-                                Ayulia Training Center.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card accordion-item active">
-                        <h2 class="accordion-header" id="headingThree">
-                            <button type="button" class="accordion-button" data-bs-toggle="collapse"
-                                data-bs-target="#accordionThree" aria-expanded="false" aria-controls="accordionThree">
-                                Apakah tersedia pelatihan untuk pemula?
-                            </button>
-                        </h2>
-                        <div id="accordionThree" class="accordion-collapse collapse show" aria-labelledby="headingThree"
-                            data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                Ya, kami menyediakan program pelatihan yang dirancang khusus untuk pemula hingga tingkat
-                                mahir.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card accordion-item">
-                        <h2 class="accordion-header" id="headingFour">
-                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#accordionFour" aria-expanded="false" aria-controls="accordionFour">
-                                Apakah saya akan mendapatkan sertifikat setelah menyelesaikan pelatihan?
-                            </button>
-                        </h2>
-                        <div id="accordionFour" class="accordion-collapse collapse" aria-labelledby="headingFour"
-                            data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                Tentu, setiap peserta yang menyelesaikan pelatihan akan mendapatkan sertifikat resmi
-                                dari Ayulia Training Center.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card accordion-item">
-                        <h2 class="accordion-header" id="headingFive">
-                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#accordionFive" aria-expanded="false" aria-controls="accordionFive">
-                                Apakah tersedia sesi pelatihan online?
-                            </button>
-                        </h2>
-                        <div id="accordionFive" class="accordion-collapse collapse" aria-labelledby="headingFive"
-                            data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                Saat ini, kami fokus pada pelatihan tatap muka untuk memastikan pembelajaran yang lebih
-                                efektif.
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>

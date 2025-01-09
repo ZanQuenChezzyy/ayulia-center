@@ -22,6 +22,7 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -43,8 +44,8 @@ class KelasResource extends Resource
     {
         return static::getModel()::count() < 10 ? 'warning' : 'info';
     }
-    protected static ?string $navigationBadgeTooltip = 'Total Peserta';
-    protected static ?string $slug = 'kelas-peserta';
+    protected static ?string $navigationBadgeTooltip = 'Total Kelas';
+    protected static ?string $slug = 'kelas';
 
     public static function form(Form $form): Form
     {
@@ -152,7 +153,7 @@ class KelasResource extends Resource
                         $jamSelesai = Carbon::createFromFormat('H:i:s', $record->jam_selesai)->format('H:i');
 
                         return '<div>' . $record->jumlah_pertemuan . ' kali Pertemuan</div>' .
-                            '<div class="text-sm text-gray-500 dark:text-gray-400">' . $jamMulai . ' WITA - ' . $jamSelesai . ' WITA</div>';
+                            '<div class="text-sm text-gray-500 dark:text-gray-400">' . $jamMulai . ' - ' . $jamSelesai . ' WITA</div>';
                     })
                     ->html(),
                 TextColumn::make('harga')
@@ -163,7 +164,13 @@ class KelasResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('instruktur_id')
+                    ->label('Instruktur')
+                    ->placeholder('Pilih Instruktur')
+                    ->relationship('instruktur', 'nama')
+                    ->native(false)
+                    ->preload()
+                    ->searchable()
             ])
             ->actions([
                 ActionGroup::make([

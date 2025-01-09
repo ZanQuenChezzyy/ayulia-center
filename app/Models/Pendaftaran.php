@@ -26,8 +26,7 @@ class Pendaftaran extends Model
     ];
 
     public function Kelas(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-{
-    return $this->belongsTo(\App\Models\Kelas::class, 'kelas_id', 'id');
-}
-
+    {
+        return $this->belongsTo(\App\Models\Kelas::class, 'kelas_id', 'id');
+    }
 }

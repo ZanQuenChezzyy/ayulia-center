@@ -9,17 +9,24 @@ use App\Models\Pertanyaan;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class PertanyaanResource extends Resource
 {
@@ -48,17 +55,15 @@ class PertanyaanResource extends Resource
                     ->schema([
                         Group::make()
                             ->schema([
-                                TextInput::make('pertanyaan')
+                                Textarea::make('pertanyaan')
                                     ->label('Pertanyaan')
                                     ->placeholder('Masukkan Pertanyaan')
                                     ->minLength(10)
-                                    ->maxLength(45)
                                     ->required(),
-                                TextInput::make('jawaban')
+                                Textarea::make('jawaban')
                                     ->label('Jawaban')
                                     ->placeholder('Masukkan Jawaban')
                                     ->minLength(10)
-                                    ->maxLength(60)
                                     ->required(),
                             ])->columnSpan(3),
                         Toggle::make('di_tampilkan')
@@ -76,17 +81,32 @@ class PertanyaanResource extends Resource
             ->columns([
                 TextColumn::make('pertanyaan')
                     ->label('Pertanyaan & Jawaban')
-                    ->description(fn(Pertanyaan $record): string => $record->jawaban)
-                    ->limit(50),
+                    ->description(fn(Pertanyaan $record): string => Str::limit($record->jawaban, 60))
+                    ->limit(40)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= $column->getCharacterLimit()) {
+                            return null;
+                        }
+                        // Only render the tooltip if the column content exceeds the length limit.
+                        return $state;
+                    }),
                 ToggleColumn::make('di_tampilkan')
-                    ->label('Di Tampilkan ?'),
+                    ->label('Di Tampilkan ?')
+                    ->hidden(fn() => !Auth::user()->can('Ubah FAQ')),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
+                    ->icon('heroicon-o-ellipsis-horizontal-circle')
+                    ->color('info')
+                    ->tooltip('Aksi')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
