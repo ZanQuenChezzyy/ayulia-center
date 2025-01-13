@@ -13,7 +13,7 @@
                     Ciptakan karya berkualitas dan menguasai keterampilan menjahit!
                 </h2>
                 <div class="landing-hero-btn d-inline-block position-relative">
-                    <a href="#landingPricing" class="btn btn-primary btn-lg">Gabung Sekarang</a>
+                    <a href="{{ url('/pendaftaran') }}" class="btn btn-primary btn-lg">Gabung Sekarang</a>
                 </div>
             </div>
         </div>

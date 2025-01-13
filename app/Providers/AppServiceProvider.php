@@ -39,13 +39,13 @@ class AppServiceProvider extends ServiceProvider
         // Navigation Top User Card
         FilamentView::registerRenderHook(
             PanelsRenderHook::SIDEBAR_NAV_START,
-            fn(): View => view('filament.user-card')
+            fn(): View => view('dashboard.user-card')
         );
 
         // Footer
         FilamentView::registerRenderHook(
             PanelsRenderHook::FOOTER,
-            fn(): View => view('filament.footer'),
+            fn(): View => view('dashboard.footer'),
             // Render The Footer for Pages or Resource
             scopes: [
                 Dashboard::class,

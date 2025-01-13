@@ -30,7 +30,8 @@
     <link rel="stylesheet" href="{{ asset('components') }}/assets/vendor/libs/swiper/swiper.css" />
 
     <!-- Page CSS -->
-
+    <link rel="stylesheet" href="{{ asset('components') }}/assets/vendor/libs/animate-css/animate.css" />
+    <link rel="stylesheet" href="{{ asset('components') }}/assets/vendor/libs/sweetalert2/sweetalert2.css" />
     <link rel="stylesheet" href="{{ asset('components') }}/assets/vendor/css/pages/front-page-landing.css" />
 
     <!-- Helpers -->

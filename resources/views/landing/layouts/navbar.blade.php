@@ -10,7 +10,7 @@
                     <i class="tf-icons bx bx-menu bx-lg align-middle text-heading fw-medium"></i>
                 </button>
                 <!-- Mobile menu toggle: End-->
-                <a href="" class="app-brand-link">
+                <a href="{{ url('/') }}" class="app-brand-link">
                     <img src="{{ asset('img/ayulia-logo.png') }}" alt="Logo" width="80">
                 </a>
             </div>
