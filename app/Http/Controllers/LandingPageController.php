@@ -6,6 +6,7 @@ use App\Models\Instruktur;
 use App\Models\Kelas;
 use App\Models\Pendaftaran;
 use App\Models\Pertanyaan;
+use App\Models\Pesan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -17,6 +18,26 @@ class LandingPageController extends Controller
         $faqs = Pertanyaan::where('di_tampilkan', true)->get();
 
         return view('landing.page.index', compact('instrukturs', 'faqs'));
+    }
+
+    public function storePesan(Request $request)
+    {
+        $validated = $request->validate([
+            'nama' => 'required|string|min:3|max:45',
+            'email' => 'required|email|min:3|max:45',
+            'pesan' => 'required|string|min:10',
+        ]);
+
+        $pesan = Pesan::create([
+            'nama' => $validated['nama'],
+            'email' => $validated['email'],
+            'pesan' => $validated['pesan'],
+        ]);
+
+        return response()->json([
+            'message' => 'Pendaftaran berhasil disimpan.',
+            'pendaftaran' => $pesan
+        ], 201);
     }
 
     public function pendaftaran()

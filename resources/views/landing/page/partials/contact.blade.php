@@ -62,24 +62,28 @@
                             Jika Anda memiliki pertanyaan seputar jadwal pelatihan, konfirmasi pendaftaran, atau program
                             lainnya, silakan tulis pesan Anda di sini.
                         </p>
-                        <form>
+                        <form id="form-pesan" action="{{ route('pesan.store') }}" method="POST">
+                            @csrf
                             <div class="row g-4">
                                 <div class="col-md-6">
-                                    <label class="form-label" for="contact-form-fullname">Nama Lengkap</label>
-                                    <input type="text" class="form-control" id="contact-form-fullname"
-                                        placeholder="Masukkan nama lengkap Anda" />
+                                    <label class="form-label" for="nama">Nama Lengkap</label>
+                                    <input type="text" class="form-control" id="nama" name="nama"
+                                        minlength="3" maxlength="45" placeholder="Masukkan nama lengkap Anda" />
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label" for="contact-form-email">Email</label>
-                                    <input type="email" id="contact-form-email" class="form-control"
-                                        placeholder="Masukkan email Anda" />
+                                    <label class="form-label" for="email">Email</label>
+                                    <input type="email" id="email" class="form-control" name="email"
+                                        minlength="3" maxlength="45" placeholder="Masukkan email Anda" />
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label" for="contact-form-message">Pesan</label>
-                                    <textarea id="contact-form-message" class="form-control" rows="11" placeholder="Tulis pesan Anda di sini"></textarea>
+                                    <label class="form-label" for="pesan">Pesan</label>
+                                    <textarea id="pesan" class="form-control" rows="11" name="pesan" minlength="10"
+                                        placeholder="Tulis pesan Anda di sini"></textarea>
                                 </div>
                                 <div class="col-12">
-                                    <button type="submit" class="btn btn-primary">Kirim Pesan</button>
+                                    <button type="submit" id="submit-button-pesan" class="btn btn-primary">
+                                        Kirim Pesan
+                                    </button>
                                 </div>
                             </div>
                         </form>

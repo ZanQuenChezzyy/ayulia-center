@@ -41,10 +41,18 @@ class InstrukturResource extends Resource
     protected static ?int $navigationSort = 2;
     public static function getNavigationBadge(): ?string
     {
+        $user = Auth::user();
+        if ($user->hasRole('Peserta')) {
+            return null;
+        }
         return static::getModel()::count();
     }
     public static function getNavigationBadgeColor(): ?string
     {
+        $user = Auth::user();
+        if ($user->hasRole('Peserta')) {
+            return null;
+        }
         return static::getModel()::count() < 10 ? 'warning' : 'info';
     }
     protected static ?string $navigationBadgeTooltip = 'Total Instruktur';

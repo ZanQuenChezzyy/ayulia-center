@@ -226,12 +226,8 @@ class PendaftaranResource extends Resource
                 TextColumn::make('tempat_lahir')
                     ->label('Tempat, Tanggal Lahir')
                     ->formatStateUsing(function (Pendaftaran $record) {
-                        // Set locale to Indonesian
                         Carbon::setLocale('id');
-
-                        // Format tanggal dengan bulan dalam bahasa Indonesia
                         $tanggalLahir = Carbon::parse($record->tanggal_lahir)->translatedFormat('d F Y');
-
                         return $record->tempat_lahir . ', ' . $tanggalLahir;
                     })
                     ->searchable()

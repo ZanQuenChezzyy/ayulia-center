@@ -25,6 +25,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class SertifikatResource extends Resource
 {
@@ -36,10 +37,18 @@ class SertifikatResource extends Resource
     protected static ?int $navigationSort = 2;
     public static function getNavigationBadge(): ?string
     {
+        $user = Auth::user();
+        if ($user->hasRole('Peserta')) {
+            return null;
+        }
         return static::getModel()::count();
     }
     public static function getNavigationBadgeColor(): ?string
     {
+        $user = Auth::user();
+        if ($user->hasRole('Peserta')) {
+            return null;
+        }
         return static::getModel()::count() < 10 ? 'warning' : 'info';
     }
     protected static ?string $navigationBadgeTooltip = 'Total Sertifikasi Peserta';
@@ -74,7 +83,20 @@ class SertifikatResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $user = Auth::user();
+
         return $table
+            ->query(
+                Sertifikat::query()->when(
+                    $user->hasRole('Peserta'), // Periksa jika peran pengguna adalah 'Peserta'
+                    function (Builder $query) use ($user) {
+                        // Filter data hanya untuk sertifikat milik user yang sedang login
+                        $query->whereHas('kelasUser', function (Builder $subQuery) use ($user) {
+                            $subQuery->where('user_id', $user->id);
+                        });
+                    }
+                )
+            )
             ->columns([
                 TextColumn::make('kelasUser.user.name')
                     ->description(fn(Sertifikat $record) => $record->kelasUser->kelas->nama)

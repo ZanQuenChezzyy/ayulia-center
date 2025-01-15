@@ -9,11 +9,17 @@ use Filament\Forms;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Section as FormSection;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Fieldset as InfoFieldset;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\RawJs;
 use Filament\Tables;
@@ -27,6 +33,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class KelasResource extends Resource
 {
@@ -38,10 +45,18 @@ class KelasResource extends Resource
     protected static ?int $navigationSort = 3;
     public static function getNavigationBadge(): ?string
     {
+        $user = Auth::user();
+        if ($user->hasRole('Peserta')) {
+            return null;
+        }
         return static::getModel()::count();
     }
     public static function getNavigationBadgeColor(): ?string
     {
+        $user = Auth::user();
+        if ($user->hasRole('Peserta')) {
+            return null;
+        }
         return static::getModel()::count() < 10 ? 'warning' : 'info';
     }
     protected static ?string $navigationBadgeTooltip = 'Total Kelas';
@@ -51,7 +66,7 @@ class KelasResource extends Resource
     {
         return $form
             ->schema([
-                Section::make('Data Kelas')
+                FormSection::make('Data Kelas')
                     ->schema([
                         Fieldset::make('Data Kelas')
                             ->schema([
@@ -134,9 +149,90 @@ class KelasResource extends Resource
             ]);
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfoSection::make('')
+                    ->schema([
+                        InfoFieldset::make('Instruktur')
+                            ->schema([
+                                ImageEntry::make('instruktur.foto')
+                                    ->label('')
+                                    ->circular()
+                                    ->size(120),
+                                Group::make()
+                                    ->schema([
+                                        TextEntry::make('instruktur.nama')
+                                            ->label('Nama Lengkap')
+                                            ->inlineLabel()
+                                            ->columnSpanFull(),
+                                        TextEntry::make('nama')
+                                            ->label('Kelas')
+                                            ->inlineLabel()
+                                            ->columnSpanFull(),
+                                        TextEntry::make('instruktur.pengalaman')
+                                            ->label('Keahlian')
+                                            ->inlineLabel()
+                                            ->columnSpanFull()
+                                    ])->columnSpan(2),
+                            ])->columns(3)
+                            ->columnSpan(1),
+
+                        InfoFieldset::make('Waktu Kelas')
+                            ->schema([
+                                TextEntry::make('tingkatan')
+                                    ->label('Tingkatan Kelas :')
+                                    ->badge()
+                                    ->color('info')
+                                    ->inlineLabel()
+                                    ->columnSpanFull(),
+                                TextEntry::make('jumlah_pertemuan')
+                                    ->label('Pertemuan :')
+                                    ->suffix(' x Pertemuan')
+                                    ->inlineLabel()
+                                    ->columnSpanFull(),
+                                TextEntry::make('jam_mulai')
+                                    ->label('Waktu Kelas : ')
+                                    ->inlineLabel()
+                                    ->formatStateUsing(function (Kelas $record) {
+                                        $jamMulai = Carbon::createFromFormat('H:i:s', $record->jam_mulai)->format('H:i');
+                                        $jamSelesai = Carbon::createFromFormat('H:i:s', $record->jam_selesai)->format('H:i');
+
+                                        return '<div class="text-sm">' . $jamMulai . ' - ' . $jamSelesai . ' WITA</div>';
+                                    })
+                                    ->html()
+                                    ->columnSpanFull(),
+                            ])->columns(2)
+                            ->columnSpan(1),
+
+                        InfoFieldset::make('Deskripsi')
+                            ->schema([
+                                TextEntry::make('deskripsi')
+                                    ->label('')
+                                    ->html()
+                                    ->columnSpanFull()
+                            ])->columns(1)
+                            ->columnSpanFull()
+                    ])->columns(2)
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
+        $user = Auth::user();
         return $table
+            ->query(
+                Kelas::query()->when(
+                    $user->hasRole('Peserta'),
+                    function ($query) use ($user) {
+                        // Filter data berdasarkan kelas user
+                        $query->whereHas('kelasUsers', function ($kelasUsersQuery) use ($user) {
+                            $kelasUsersQuery->where('user_id', $user->id);
+                        });
+                    }
+                )
+            )
             ->columns([
                 TextColumn::make('nama')
                     ->label('Kelas')
@@ -161,7 +257,8 @@ class KelasResource extends Resource
                     ->prefix('Rp ')
                     ->suffix(',00')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->hidden(fn() => !Auth::user()->can('Ubah Kelas')),
             ])
             ->filters([
                 SelectFilter::make('instruktur_id')

@@ -7,6 +7,7 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use Awcodes\LightSwitch\LightSwitchPlugin;
 use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -32,10 +33,11 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('/administrator')
+            ->path('/ayulia')
             ->spa()
             ->brandLogo(asset('img/ayulia-logo.png'))
             ->brandLogoHeight('3rem')
+            ->defaultThemeMode(ThemeMode::Light)
             ->login(Login::class)
             ->profile(EditProfile::class)
             ->colors([

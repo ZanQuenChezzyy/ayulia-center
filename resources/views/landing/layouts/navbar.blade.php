@@ -24,19 +24,27 @@
                 </button>
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link fw-medium" aria-current="page" href="#beranda">Beranda</a>
+                        <a class="nav-link fw-medium {{ Request::is('/') ? 'd-none' : '' }}" aria-current="page"
+                            href="/">Beranda</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-medium" href="#unggulan">Unggulan</a>
+                        <a class="nav-link fw-medium {{ Request::is('/') ? '' : 'd-none' }}"
+                            href="#unggulan">Unggulan</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-medium" href="#inspectur">Inspectur</a>
+                        <a class="nav-link fw-medium {{ Request::is('/') ? '' : 'd-none' }}"
+                            href="#inspectur">Inspectur</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-medium" href="#faq">FAQ</a>
+                        <a class="nav-link fw-medium {{ Request::is('/') ? '' : 'd-none' }}" href="#faq">FAQ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-medium" href="#hubungiKami">Hubungi Kami</a>
+                        <a class="nav-link fw-medium {{ Request::is('/') ? '' : 'd-none' }}" href="#hubungiKami">Hubungi
+                            Kami</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-medium {{ Request::is('pendaftaran') ? 'active' : '' }}"
+                            href="/pendaftaran">Gabung Member</a>
                     </li>
                 </ul>
             </div>
@@ -47,14 +55,14 @@
                 <!-- navbar button: Start -->
                 @if (auth()->check())
                     <li>
-                        <a href="{{ url('/administrator') }}" class="btn btn-primary">
+                        <a href="{{ url('/ayulia') }}" class="btn btn-primary">
                             <span class="tf-icons bx bx-user scaleX-n1-rtl me-md-1"></span>
                             <span class="d-none d-md-block">Dashboard</span>
                         </a>
                     </li>
                 @else
                     <li>
-                        <a href="{{ url('/administrator') }}" class="btn btn-primary">
+                        <a href="{{ url('/ayulia') }}" class="btn btn-primary">
                             <span class="tf-icons bx bx-log-in scaleX-n1-rtl me-md-1"></span>
                             <span class="d-none d-md-block">Masuk</span>
                         </a>

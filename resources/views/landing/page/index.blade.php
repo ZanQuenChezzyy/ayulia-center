@@ -13,3 +13,7 @@
 
     @include('landing.page.partials.contact')
 @endsection
+
+@push('scripts')
+    @include('landing.page.scripts.store-pesan')
+@endpush
